@@ -1,0 +1,1 @@
+yoyo list --database postgresql://postgres:321@192.168.0.112/yoyotest ./migrations

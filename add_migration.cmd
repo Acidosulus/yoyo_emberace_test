@@ -1,0 +1,1 @@
+yoyo new --sql ./migrations -m %1

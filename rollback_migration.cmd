@@ -1,0 +1,1 @@
+yoyo rollback --database postgresql://postgres:321@192.168.0.112/yoyotest ./migrations -r 01
