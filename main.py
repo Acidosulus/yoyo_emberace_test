@@ -33,17 +33,21 @@ conn = psycopg2.connect(
     password="321",
     host="192.168.0.112"
 )
+
+
+
 queries = embrace.module("sql")
 
+# -------------Маппинг в dataclass запроса из файла--------------------------------------------------------------
+result = queries.aircrafts.returning(Aircraft)
+print([row for row in result.many(conn)])
 
-
-# -------------Маппинг в dataclass------------------------------------------------------------------------------
+# -------------Маппинг в dataclass запроса из строки--------------------------------------------------------------
 query = queries.query(
                     """
                       SELECT aircraft_code, model,"range" FROM bookings.aircrafts;
                     """).returning(Aircraft)
 print([aircraft for aircraft in query.many(conn)])
-
 
 
 # -------------Маппинг в несколько dataclass-ов результата джойна------------------------------------------------
@@ -54,17 +58,17 @@ query = queries.query(
             left join bookings.aircrafts as aircrafts on aircrafts.aircraft_code = flights.aircraft_code
             where aircrafts.aircraft_code = 'CN1'
             order by flight_id
-            limit 5 offset 5
+            limit :limit offset :offset
         ;
     """
 )
-
 #------------------попытка прикинуть время маппинга/фетчинга, чтобы оценить нужно удалить лимит в запросе--------
 print('mapping')
-map = query.returning(  (mapobject(Aircraft, split="aircraft_code"),
-               mapobject(Flight,   split="flight_id")) )
+map = query.returning(  (   mapobject(Aircraft, split="aircraft_code"),
+                            mapobject(Flight,   split="flight_id"))
+                             )
 print('fetching')
-result = [(aircraft, flight) for aircraft, flight in map.many(conn)]
+result = [(aircraft, flight) for aircraft, flight in map.many(conn, limit=5, offset=10)]
 print('before print')
 print(result)
 
